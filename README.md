@@ -26,15 +26,7 @@
 
 
 ### Quick Start (Recommended)
-1. Clone the repository
-2. Start all services and seed the database:
-	```sh
-	docker compose up -d
-	docker compose exec backend npm run db:push
-	docker compose exec backend npm run seed
-	docker compose exec frontend npm run dev
-	```
-3. Open [http://localhost:3000](http://localhost:3000) to use the app.
+
 
 ## Development
 
