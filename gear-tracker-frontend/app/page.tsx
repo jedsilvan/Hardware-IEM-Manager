@@ -8,6 +8,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchIEMs().then(setIems).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    console.log('Fetched IEMs:', iems);
+  }, [iems]);
   
   return (
     <h1>test</h1>

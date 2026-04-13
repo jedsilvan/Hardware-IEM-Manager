@@ -1,9 +1,17 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import { db } from './db';
 import { iems, cables, iemToCables } from './db/schema';
 import { z } from 'zod';
 
 const app = express();
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+app.use(
+  cors({
+    origin: allowedOrigin,
+  })
+);
 app.use(express.json());
 
 const IEMSchema = z.object({
