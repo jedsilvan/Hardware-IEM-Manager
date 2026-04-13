@@ -17,5 +17,38 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./gear-tracker-backend
+      dockerfile: Dockerfile
+    container_name: gear_tracker_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://dev_user:dev_password@db:5432/gear_tracker
+      FRONTEND_URL: http://localhost:3000
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    command: sh -c "npm run push ; npm run seed ; npm run dev"
+
+  frontend:
+    build:
+      context: ./gear-tracker-frontend
+      dockerfile: Dockerfile
+    container_name: gear_tracker_frontend
+    restart: always
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    command: npm run dev -- --hostname 0.0.0.0 --port 3000
+
 volumes:
   postgres_data:
