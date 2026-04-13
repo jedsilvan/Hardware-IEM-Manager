@@ -1,0 +1,11 @@
+# Ignore node_modules in both backend and frontend
+gear-tracker-backend/node_modules/
+gear-tracker-frontend/node_modules/
+# Next.js build output
+gear-tracker-frontend/.next/
+gear-tracker-frontend/out/
+gear-tracker-frontend/.env.local
+gear-tracker-frontend/.env.development.local
+gear-tracker-frontend/.env.test.local
+gear-tracker-frontend/.env.production.local
+gear-tracker-frontend/.vercel/
