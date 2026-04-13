@@ -1,17 +1,40 @@
-version: "3.8"
 services:
-  app:
-    build: .
-    container_name: gear_tracker_all_in_one
+  backend:
+    build: ./gear-tracker-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://dev_user:dev_password@db:5432/gear_tracker
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./gear-tracker-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:3001/api
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    container_name: gear_tracker_db
+    restart: always
     environment:
       POSTGRES_USER: dev_user
       POSTGRES_PASSWORD: dev_password
       POSTGRES_DB: gear_tracker
     ports:
-      - "5432:5432"   # Postgres
-      - "3001:3001"   # Backend (adjust if needed)
-      - "3000:3000"   # Frontend
+      - "5432:5432"
     volumes:
-      - ./gear-tracker-backend:/app/gear-tracker-backend
-      - ./gear-tracker-frontend:/app/gear-tracker-frontend
-    command: ["./start.sh"]
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d gear_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
