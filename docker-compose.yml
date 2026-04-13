@@ -1,4 +1,23 @@
 services:
+  backend:
+    build: ./gear-tracker-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://dev_user:dev_password@db:5432/gear_tracker
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./gear-tracker-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:3001/api
+    depends_on:
+      - backend
+
   db:
     image: postgres:16-alpine
     container_name: gear_tracker_db
