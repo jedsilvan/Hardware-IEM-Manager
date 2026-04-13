@@ -27,6 +27,41 @@
 
 ### Quick Start (Recommended)
 
+1. Clone the repo and open it in your terminal.
+2. Build and start all services (Postgres + backend + frontend):
+
+```bash
+docker compose up --build
+```
+
+Note: on each backend start/restart in Docker Compose, the app runs the seed script (`npm run seed`). This clears and repopulates the database with sample data every time.
+
+3. Open the app:
+	- Frontend: http://localhost:3000
+	- Backend API: http://localhost:3001
+4. Stop everything with `Ctrl+C`, then remove containers (optional):
+
+```bash
+docker compose down
+```
+
+5. To also remove the database volume and start from a clean DB:
+
+```bash
+docker compose down -v
+```
+
+### Troubleshooting
+
+- If `docker compose up --build` fails immediately, confirm Docker Desktop is running.
+- If ports are already in use, free `3000`, `3001`, and `5432` or change them in `docker-compose.yml`.
+- To inspect logs per service:
+
+```bash
+docker compose logs -f db
+docker compose logs -f backend
+docker compose logs -f frontend
+```
 
 ## Development
 
