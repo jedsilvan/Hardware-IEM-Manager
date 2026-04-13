@@ -56,3 +56,27 @@ app.post('/iems/:iemId/cables/:cableId', async (req: Request, res: Response) => 
     res.status(400).json({ error: 'Failed to link cable to IEM' });
   }
 });
+
+app.get('/iems', async (_req: Request, res: Response) => {
+  try {
+    const allIems = await db.select().from(iems);
+    res.status(200).json(allIems);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch IEMs' });
+  }
+});
+
+app.get('/cables', async (_req: Request, res: Response) => {
+  try {
+    const allCables = await db.select().from(cables);
+    res.status(200).json(allCables);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch cables' });
+  }
+});
+
+const port = Number(process.env.PORT) || 3001;
+
+app.listen(port, () => {
+  console.log(`API server running on http://localhost:${port}`);
+});
