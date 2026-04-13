@@ -24,17 +24,47 @@
 - [Docker](https://www.docker.com/) & Docker Compose
 - Node.js (for local development, v20+ recommended)
 
-
-### Quick Start (Recommended)
-1. Clone the repository
-2. Start all services and seed the database:
+### Quick Start (Docker, Recommended)
+1. **Clone the repository:**
+	```sh
+	git clone <this-repo-url>
+	cd Hardware-IEM-Manager
+	```
+2. **Start all services (frontend, backend, database):**
 	```sh
 	docker compose up -d
-	docker compose exec backend npm run db:push
-	docker compose exec backend npm run seed
-	docker compose exec frontend npm run dev
 	```
-3. Open [http://localhost:3000](http://localhost:3000) to use the app.
+3. **Apply database migrations and seed data:**
+	```sh
+	docker compose exec app npm --prefix gear-tracker-backend run push
+	docker compose exec app npm --prefix gear-tracker-backend run seed
+	```
+4. **Access the app:**
+	- Frontend: [http://localhost:3000](http://localhost:3000)
+	- Backend API: [http://localhost:3001](http://localhost:3001)
+
+---
+
+### Manual Development (No Docker)
+1. **Start PostgreSQL** (locally, or with Docker):
+	- Use the connection string in `gear-tracker-backend/.env` or set up your own.
+2. **Backend:**
+	```sh
+	cd gear-tracker-backend
+	npm install
+	npm run push   # Apply migrations (drizzle-kit)
+	npm run seed   # Seed the database
+	npm run dev    # Start backend (default: http://localhost:3001)
+	```
+3. **Frontend:**
+	```sh
+	cd gear-tracker-frontend
+	npm install
+	npm run dev    # Start frontend (default: http://localhost:3000)
+	```
+4. **Access the app:**
+	- Frontend: [http://localhost:3000](http://localhost:3000)
+	- Backend API: [http://localhost:3001](http://localhost:3001)
 
 ## Development
 
