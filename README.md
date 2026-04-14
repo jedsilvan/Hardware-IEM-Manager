@@ -1,6 +1,6 @@
 # Hardware IEM Manager
 
-Hardware IEM Manager is a full-stack app for managing IEMs, cables, and the compatibility links between them. The stack is a Next.js frontend, an Express + Drizzle backend, and PostgreSQL, with Docker Compose for local development.
+Hardware IEM Manager is a full-stack CRUD app for managing IEMs, cables, and the compatibility links between them. The stack is a Next.js frontend, an Express + Drizzle backend, and PostgreSQL, with Docker Compose for local development.
 
 ## Screenshots
 
