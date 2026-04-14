@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Plus } from 'lucide-react'
 
 import { ConnectorBadge } from '@/components/connector-badge'
 import { fetchCables, fetchIEMs, type Cable, type IEM } from '@/lib/api'
@@ -35,11 +36,20 @@ export default async function Dashboard() {
         </header>
 
         <section id="iems" className="space-y-5">
-          <div className="flex items-end justify-between gap-3">
-            <h2 className="text-2xl font-semibold">IEMs</h2>
-            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-              {iemsWithImages.length} items
-            </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-2xl font-semibold">IEMs</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                {iemsWithImages.length} items
+              </p>
+            </div>
+            <Link
+              href="/iems/new"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add IEM
+            </Link>
           </div>
 
           {iemsWithImages.length === 0 ? (
@@ -80,11 +90,20 @@ export default async function Dashboard() {
         </section>
 
         <section id="cables" className="space-y-5">
-          <div className="flex items-end justify-between gap-3">
-            <h2 className="text-2xl font-semibold">Cables</h2>
-            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-              {cablesWithImages.length} items
-            </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-2xl font-semibold">Cables</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                {cablesWithImages.length} items
+              </p>
+            </div>
+            <Link
+              href="/cables/new"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Cable
+            </Link>
           </div>
 
           {cablesWithImages.length === 0 ? (

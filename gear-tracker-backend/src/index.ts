@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './db'
 import { iems, cables, iemToCables } from './db/schema'
+import { createImageDataUrl, getConnectorAccent } from './db/image'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -62,7 +63,16 @@ function mapIemRowsWithCompatibleCables(
 app.post('/iems', async (req: Request, res: Response) => {
   try {
     const validatedData = IEMSchema.parse(req.body)
-    const newIem = await db.insert(iems).values(validatedData).returning()
+    const newIem = await db
+      .insert(iems)
+      .values({
+        ...validatedData,
+        image: createImageDataUrl(
+          `${validatedData.brand} ${validatedData.model}`,
+          getConnectorAccent(validatedData.connector)
+        ),
+      })
+      .returning()
     res.status(201).json(newIem)
   } catch (error) {
     res.status(400).json({ error: 'Invalid IEM data' })
@@ -72,7 +82,13 @@ app.post('/iems', async (req: Request, res: Response) => {
 app.post('/cables', async (req: Request, res: Response) => {
   try {
     const validatedData = CableSchema.parse(req.body)
-    const newCable = await db.insert(cables).values(validatedData).returning()
+    const newCable = await db
+      .insert(cables)
+      .values({
+        ...validatedData,
+        image: createImageDataUrl(validatedData.name, getConnectorAccent(validatedData.connector)),
+      })
+      .returning()
     res.status(201).json(newCable)
   } catch (error) {
     res.status(400).json({ error: 'Invalid cable data' })
@@ -86,6 +102,18 @@ app.post('/iems/:iemId/cables/:cableId', async (req: Request, res: Response) => 
       iemId: parseInt(iemId),
       cableId: parseInt(cableId),
     })
+
+    const [iem] = await db.select().from(iems).where(eq(iems.id, validatedData.iemId)).limit(1)
+    const [cable] = await db.select().from(cables).where(eq(cables.id, validatedData.cableId)).limit(1)
+
+    if (!iem || !cable) {
+      return res.status(404).json({ error: 'IEM or cable not found' })
+    }
+
+    if (iem.connector !== cable.connector) {
+      return res.status(400).json({ error: 'Cable connector must match the IEM connector type' })
+    }
+
     await db.insert(iemToCables).values(validatedData)
     res.status(201).json({ message: 'Cable linked to IEM' })
   } catch (error) {

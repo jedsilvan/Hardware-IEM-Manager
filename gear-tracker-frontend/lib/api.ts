@@ -21,6 +21,15 @@ export type IEM = {
   compatibleCables: Cable[];
 };
 
+async function getApiErrorMessage(res: Response, fallbackMessage: string) {
+  try {
+    const body = (await res.json()) as { error?: string };
+    return body.error || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+}
+
 export async function fetchIEMs(): Promise<IEM[]> {
   try {
     const res = await fetch(`${apiBase}/iems`);
@@ -77,6 +86,10 @@ export async function linkCableToIEM(iemId: number, cableId: number) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   });
-  if (!res.ok) throw new Error('Failed to link cable');
+
+  if (!res.ok) {
+    throw new Error(await getApiErrorMessage(res, 'Failed to link cable'));
+  }
+
   return res.json();
 }

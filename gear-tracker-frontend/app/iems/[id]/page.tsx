@@ -59,7 +59,7 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
             </div>
           </article>
 
-          <aside className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6">
+          <aside className="h-fit rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6">
             <h2 className="text-lg font-semibold">Compatibility</h2>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
               Cables listed below are linked to this IEM through the compatibility table and share the same
