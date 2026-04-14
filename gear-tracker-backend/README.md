@@ -1,71 +1,145 @@
 # Gear Tracker Backend
 
-This is the backend service for the Gear Tracker application. It manages hardware inventory, IEM (In-Ear Monitor) assignments, and related data.
+Express + Drizzle backend for the Hardware IEM Manager. It manages IEMs, cables, and the compatibility relationship table that links them.
 
 ## Features
-- RESTful API for managing gear and assignments
-- Database integration (configured via Drizzle ORM)
-- Seed scripts for populating initial data
-- Docker Compose support for easy development
-- Hot reload in Docker and local development (`tsx watch`)
+- CRUD-style API for IEMs and cable inventory
+- Compatibility linking through the `iem_to_cables` relationship table
+- Validation with `zod`
+- Generated SVG preview images for seeded and created items
+- Drizzle ORM with PostgreSQL
+- Local hot reload with `tsx watch`
+- Docker-friendly development flow
 
 ## Project Structure
-```
+```text
 gear-tracker-backend/
-├── drizzle.config.ts          # Drizzle ORM configuration
-├── package.json               # Node.js dependencies and scripts
+├── drizzle.config.ts
+├── package.json
 └── src/
-    ├── index.ts               # Application entry point
+    ├── index.ts
     └── db/
-        ├── index.ts           # Database connection setup
-        ├── schema.ts          # Database schema definitions
-        └── seed.ts            # Database seeding script
+        ├── image.ts
+        ├── index.ts
+        ├── schema.ts
+        └── seed.ts
 ```
 
-## Getting Started
+## Prerequisites
+- Node.js 18+
+- PostgreSQL
+- Docker and Docker Compose for containerized development
 
-### Prerequisites
-- Node.js (v18+ recommended)
-- Docker & Docker Compose (for containerized setup)
+## Environment
+Set these when running outside Docker:
 
-### Installation
-1. Install dependencies:
-   ```bash
-   npm ci
-   ```
-2. Provide `DATABASE_URL` in the environment when running outside Docker.
+- `DATABASE_URL`: PostgreSQL connection string used by Drizzle and the API
+- `PORT`: Optional. Defaults to `3001`
+- `FRONTEND_URL`: Optional CORS origin. Defaults to `http://localhost:3000`
 
-Docker Compose already injects `DATABASE_URL` for the backend container. If you run backend or Drizzle commands from your host shell, export `DATABASE_URL` first.
+## Installation
+```bash
+npm ci
+```
 
-### Running the Backend
-- **Locally:**
-  ```bash
-  npm run dev
-  ```
-- **With Docker Compose (from repository root):**
-  ```bash
-  docker compose up --build db backend
-  ```
+## Running
 
-The backend API is available at `http://localhost:3001`.
+### Local development
+```bash
+npm run dev
+```
 
-### Docker Development Behavior
-- The backend container runs this startup chain: `npm run db:push ; npm run db:seed ; npm run dev`.
-- On each container start/restart, schema changes are pushed and seed is executed.
-- Seed clears and repopulates tables, so data resets on backend restart.
-- Source files are bind-mounted in Docker, and `npm run dev` uses `tsx watch`, so backend changes hot reload automatically.
+API default URL:
+```text
+http://localhost:3001
+```
 
-### Database Seeding
-To seed the database with initial data:
+### Docker Compose
+From the repository root:
+
+```bash
+docker compose up --build db backend
+```
+
+The backend container is expected to run schema push, seed, and dev watch on startup.
+
+## Database
+
+### Push schema
+```bash
+npm run db:push
+```
+
+### Seed data
 ```bash
 npm run db:seed
 ```
 
-## Scripts
-- `npm run dev` — Start the backend in development mode
-- `npm run generate` — Generate Drizzle migration files
-- `npm run db:push` — Push schema to the configured database
-- `npm run db:seed` — Seed the database
+Current seed behavior:
+- Clears `iem_to_cables`, `cables`, and `iems`
+- Recreates sample IEMs and cables
+- Rebuilds compatibility links based on matching connector types
 
-## License
-MIT
+## API Overview
+
+### Health
+- `GET /health`
+
+### IEMs
+- `GET /iems`
+- `GET /iems/:iemId`
+- `POST /iems`
+- `PATCH /iems/:iemId`
+- `DELETE /iems/:iemId`
+
+IEM payload:
+
+```json
+{
+  "brand": "Moondrop",
+  "model": "Blessing 3",
+  "connector": "0.78mm"
+}
+```
+
+IEM update/delete notes:
+- Updating connector is blocked if linked cables would become incompatible
+- Deleting an IEM also deletes its rows from `iem_to_cables`
+
+### Cables
+- `GET /cables`
+- `POST /cables`
+- `DELETE /cables/:cableId`
+
+Cable payload:
+
+```json
+{
+  "name": "Effect Audio Ares S",
+  "connector": "0.78mm",
+  "material": "Copper"
+}
+```
+
+Cable delete notes:
+- Deleting a cable also deletes its rows from `iem_to_cables`
+
+### Compatibility Links
+- `POST /iems/:iemId/cables/:cableId`
+- `DELETE /iems/:iemId/cables/:cableId`
+
+Compatibility rules:
+- IEM and cable must exist
+- Connector types must match before a link can be created
+- Deleting a link removes a single row from the relationship table
+
+## Scripts
+- `npm run dev` — Start the API with watch mode
+- `npm run generate` — Generate Drizzle migration files
+- `npm run db:push` — Push schema changes to the configured database
+- `npm run db:seed` — Reset and seed the database
+
+## Notes
+- Item images are generated as inline SVG data URLs in the backend
+- CORS is restricted to `FRONTEND_URL`
+- API validation errors return `400`; missing records return `404`
