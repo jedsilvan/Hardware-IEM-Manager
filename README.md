@@ -2,6 +2,38 @@
 
 Hardware IEM Manager is a full-stack app for managing IEMs, cables, and the compatibility links between them. The stack is a Next.js frontend, an Express + Drizzle backend, and PostgreSQL, with Docker Compose for local development.
 
+## Screenshots
+
+### Dashboard
+Overview of IEMs and cables on the home page.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### IEM Detail
+Selected IEM with compatibility list and actions.
+
+![IEM Detail](docs/screenshots/iem-detail.png)
+
+### Add IEM
+Form to create a new IEM and preselect compatible cables.
+
+![Add IEM](docs/screenshots/iem-add.png)
+
+### Edit IEM
+Form to update IEM details and connector type.
+
+![Edit IEM](docs/screenshots/iem-edit.png)
+
+### Add Cable
+Form to add a new cable to the collection.
+
+![Add Cable](docs/screenshots/cable-add.png)
+
+### Additional View
+Extra captured page state from the app.
+
+![Additional View](docs/screenshots/extra-view.png)
+
 ## Tech Stack
 - Frontend: Next.js, React, TypeScript, Tailwind CSS
 - Backend: Express, Drizzle ORM, Zod
