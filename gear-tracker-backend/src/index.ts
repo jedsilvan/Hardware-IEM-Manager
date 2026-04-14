@@ -3,7 +3,7 @@ import cors from 'cors'
 import { db } from './db'
 import { iems, cables, iemToCables } from './db/schema'
 import { createImageDataUrl, getConnectorAccent } from './db/image'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 const app = express()
@@ -173,6 +173,35 @@ app.post('/iems/:iemId/cables/:cableId', async (req: Request, res: Response) => 
   }
 })
 
+app.delete('/iems/:iemId/cables/:cableId', async (req: Request, res: Response) => {
+  try {
+    const iemId = Number(req.params.iemId)
+    const cableId = Number(req.params.cableId)
+
+    if (Number.isNaN(iemId) || Number.isNaN(cableId)) {
+      return res.status(400).json({ error: 'Invalid IEM or cable id' })
+    }
+
+    const [relationship] = await db
+      .select()
+      .from(iemToCables)
+      .where(and(eq(iemToCables.iemId, iemId), eq(iemToCables.cableId, cableId)))
+      .limit(1)
+
+    if (!relationship) {
+      return res.status(404).json({ error: 'Relationship not found' })
+    }
+
+    await db
+      .delete(iemToCables)
+      .where(and(eq(iemToCables.iemId, iemId), eq(iemToCables.cableId, cableId)))
+
+    return res.status(200).json({ message: 'Relationship deleted' })
+  } catch (_error) {
+    return res.status(500).json({ error: 'Failed to delete relationship' })
+  }
+})
+
 app.get('/iems', async (_req: Request, res: Response) => {
   try {
     const iemRows = await db
@@ -228,6 +257,52 @@ app.get('/cables', async (_req: Request, res: Response) => {
     res.status(200).json(allCables)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch cables' })
+  }
+})
+
+app.delete('/iems/:iemId', async (req: Request, res: Response) => {
+  try {
+    const iemId = Number(req.params.iemId)
+
+    if (Number.isNaN(iemId)) {
+      return res.status(400).json({ error: 'Invalid IEM id' })
+    }
+
+    const [existingIem] = await db.select().from(iems).where(eq(iems.id, iemId)).limit(1)
+
+    if (!existingIem) {
+      return res.status(404).json({ error: 'IEM not found' })
+    }
+
+    await db.delete(iemToCables).where(eq(iemToCables.iemId, iemId))
+    await db.delete(iems).where(eq(iems.id, iemId))
+
+    return res.status(200).json({ message: 'IEM deleted' })
+  } catch (_error) {
+    return res.status(500).json({ error: 'Failed to delete IEM' })
+  }
+})
+
+app.delete('/cables/:cableId', async (req: Request, res: Response) => {
+  try {
+    const cableId = Number(req.params.cableId)
+
+    if (Number.isNaN(cableId)) {
+      return res.status(400).json({ error: 'Invalid cable id' })
+    }
+
+    const [existingCable] = await db.select().from(cables).where(eq(cables.id, cableId)).limit(1)
+
+    if (!existingCable) {
+      return res.status(404).json({ error: 'Cable not found' })
+    }
+
+    await db.delete(iemToCables).where(eq(iemToCables.cableId, cableId))
+    await db.delete(cables).where(eq(cables.id, cableId))
+
+    return res.status(200).json({ message: 'Cable deleted' })
+  } catch (_error) {
+    return res.status(500).json({ error: 'Failed to delete cable' })
   }
 })
 

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ConnectorBadge } from '@/components/connector-badge'
+import { DeleteIemButton } from '@/components/delete-iem-button'
+import { UnlinkCableButton } from '@/components/unlink-cable-button'
 import { fetchIEMById } from '@/lib/api'
 import { getCableAccent } from '@/lib/cable-accent'
 import { cn } from '@/lib/utils'
@@ -35,12 +37,15 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
           >
             Back to Dashboard
           </Link>
-          <Link
-            href={`/iems/${iem.id}/edit`}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
-          >
-            Edit IEM
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/iems/${iem.id}/edit`}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
+            >
+              Edit IEM
+            </Link>
+            <DeleteIemButton iemId={iem.id} />
+          </div>
         </div>
 
         <section className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -107,9 +112,12 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{cable.material || 'Cable'}</p>
                   <div className="flex items-center justify-between">
                     <ConnectorBadge connector={cable.connector} />
-                    <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', accent.compatiblePill)}>
-                      Compatible
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', accent.compatiblePill)}>
+                        Compatible
+                      </span>
+                      <UnlinkCableButton iemId={iem.id} cableId={cable.id} />
+                    </div>
                   </div>
                 </div>
               </article>

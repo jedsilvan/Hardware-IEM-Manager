@@ -85,6 +85,19 @@ export async function updateIEM(iemId: number, data: { brand: string; model: str
   return res.json() as Promise<IEM>;
 }
 
+export async function deleteIEM(iemId: number) {
+  const res = await fetch(`${apiBase}/iems/${iemId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error(await getApiErrorMessage(res, 'Failed to delete IEM'));
+  }
+
+  return res.json();
+}
+
 export async function createCable(data: { name: string; connector: string; material?: string }) {
   const res = await fetch(`${apiBase}/cables`, {
     method: 'POST',
@@ -92,6 +105,19 @@ export async function createCable(data: { name: string; connector: string; mater
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error('Failed to create cable');
+  return res.json();
+}
+
+export async function deleteCable(cableId: number) {
+  const res = await fetch(`${apiBase}/cables/${cableId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error(await getApiErrorMessage(res, 'Failed to delete cable'));
+  }
+
   return res.json();
 }
 
@@ -103,6 +129,19 @@ export async function linkCableToIEM(iemId: number, cableId: number) {
 
   if (!res.ok) {
     throw new Error(await getApiErrorMessage(res, 'Failed to link cable'));
+  }
+
+  return res.json();
+}
+
+export async function unlinkCableFromIEM(iemId: number, cableId: number) {
+  const res = await fetch(`${apiBase}/iems/${iemId}/cables/${cableId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error(await getApiErrorMessage(res, 'Failed to unlink cable'));
   }
 
   return res.json();

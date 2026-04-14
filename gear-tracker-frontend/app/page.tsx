@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 
 import { ConnectorBadge } from '@/components/connector-badge'
+import { DeleteCableButton } from '@/components/delete-cable-button'
 import { fetchCables, fetchIEMs, type Cable, type IEM } from '@/lib/api'
 import { getCableAccent } from '@/lib/cable-accent'
 import { cn } from '@/lib/utils'
@@ -140,7 +141,10 @@ export default async function Dashboard() {
                   <div className="space-y-3 p-4">
                     <h3 className="text-base font-semibold">{cable.name}</h3>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">{cable.material || 'Cable'}</p>
-                    <ConnectorBadge connector={cable.connector} />
+                    <div className="flex items-center justify-between gap-3">
+                      <ConnectorBadge connector={cable.connector} />
+                      <DeleteCableButton cableId={cable.id} />
+                    </div>
                   </div>
                 </article>
               )
