@@ -1,82 +1,150 @@
-# Gear Tracker
+# Hardware IEM Manager
 
-**Gear Tracker** is a full-stack application for managing your audio hardware collection, including IEMs (In-Ear Monitors), cables, and source gear. It features a modern Next.js frontend, a Node.js backend with Drizzle ORM, and a PostgreSQL database—all orchestrated with Docker Compose.
+Hardware IEM Manager is a full-stack app for managing IEMs, cables, and the compatibility links between them. The stack is a Next.js frontend, an Express + Drizzle backend, and PostgreSQL, with Docker Compose for local development.
 
-## Features
-- List, add, edit, and delete IEMs, cables, and gear
-- Many-to-many relationship management (e.g., cables compatible with multiple IEMs)
-- Compatibility checker logic enforced on the backend
-- Modern UI with Next.js and Tailwind CSS
-- Easy local development with Docker Compose
-- Hot reload in Docker for frontend and backend development
+## Tech Stack
+- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Backend: Express, Drizzle ORM, Zod
+- Database: PostgreSQL
+- UI primitives: Radix Alert Dialog via shadcn-style wrapper
+- Tooling: Docker Compose, ESLint, Prettier
 
-## Project Structure
+## Current Scope
+- Browse IEMs and cables from the dashboard
+- View an IEM and its compatible cables
+- Create IEMs and cables
+- Edit IEMs
+- Delete IEMs and cables with confirmation dialogs
+- Add and remove compatibility links
+- Enforce connector compatibility in the backend
 
+Current non-goals / gaps:
+- No source gear module
+- No dedicated cable detail page
+- No active cable edit route in the current frontend route tree
+
+## Repository Layout
+
+```text
+.
+├── docker-compose.yml
+├── gear-tracker-backend/
+│   ├── README.md
+│   ├── Dockerfile
+│   ├── drizzle.config.ts
+│   ├── package.json
+│   └── src/
+└── gear-tracker-frontend/
+	├── README.md
+	├── Dockerfile
+	├── package.json
+	├── app/
+	├── components/
+	├── lib/
+	└── styles/
 ```
-├── gear-tracker-backend/   # Node.js backend (Drizzle ORM, Express)
-├── gear-tracker-frontend/  # Next.js frontend
-├── docker-compose.yml      # Multi-service orchestration
-└── README.md               # Project overview (this file)
-```
 
-## Getting Started
+## Services
+
+### Frontend
+- Next.js App Router
+- Runs on `http://localhost:3000`
+
+### Backend
+- Express + Drizzle ORM
+- Runs on `http://localhost:3001`
+
+### Database
+- PostgreSQL 16
+- Exposed on `localhost:5432`
+
+## Quick Start
 
 ### Prerequisites
-- [Docker](https://www.docker.com/) & Docker Compose
-- Node.js (for local development, v20+ recommended)
+- Docker Desktop / Docker Engine
+- Docker Compose
+- Node.js 18+ if you want to run frontend or backend outside containers
 
-
-### Quick Start (Recommended)
-
-1. Clone the repo and open it in your terminal.
-2. Build and start all services (Postgres + backend + frontend):
+### Start the full stack
+From the repository root:
 
 ```bash
 docker compose up --build
 ```
 
-Note: on each backend start/restart in Docker Compose, the app runs the seed script (`npm run db:seed`). This clears and repopulates the database with sample data every time.
+Open:
+- Frontend: `http://localhost:3000`
+- Backend health endpoint: `http://localhost:3001/health`
 
-Hot reload note: Docker is configured for live development. Editing files in `gear-tracker-frontend/` or `gear-tracker-backend/` will trigger automatic reload/restart in the running containers.
-
-3. Open the app:
-	- Frontend: http://localhost:3000
-	- Backend API: http://localhost:3001
-4. Stop everything with `Ctrl+C`, then remove containers (optional):
-
+### Stop the stack
 ```bash
 docker compose down
 ```
 
-5. To also remove the database volume and start from a clean DB:
-
+### Reset containers and database volume
 ```bash
 docker compose down -v
 ```
 
-### Troubleshooting
+## Docker Development Behavior
+- The backend waits for Postgres, pushes schema, reseeds the database, then starts watch mode
+- The frontend runs in Next.js development mode with polling enabled for container-friendly file watching
+- Both frontend and backend source directories are bind-mounted for live development
 
-- If `docker compose up --build` fails immediately, confirm Docker Desktop is running.
-- If ports are already in use, free `3000`, `3001`, and `5432` or change them in `docker-compose.yml`.
-- If reload seems stuck, recreate the frontend container: `docker compose up -d --force-recreate frontend`.
-- To inspect logs per service:
+Important seed behavior:
+- The backend container runs `npm run db:seed` on startup
+- Seeding clears and repopulates the database each time the backend container starts
 
+## Local Development Without Docker
+
+### Backend
+See [gear-tracker-backend/README.md](gear-tracker-backend/README.md).
+
+### Frontend
+See [gear-tracker-frontend/README.md](gear-tracker-frontend/README.md).
+
+## High-Level Features
+- Relationship-aware compatibility model using `iem_to_cables`
+- Backend connector validation before links are created
+- Relationship cleanup when deleting IEMs or cables
+- Delete confirmation dialogs in the frontend using Radix Alert Dialog
+- Connector badge colors remain fixed by connector type
+- Cable-related accents are aligned through shared accent mapping in the frontend
+
+## Common Commands
+
+### Full stack
 ```bash
-docker compose logs -f db
+docker compose up --build
+docker compose down
 docker compose logs -f backend
 docker compose logs -f frontend
+docker compose logs -f db
 ```
 
-## Development
+### Frontend
+```bash
+cd gear-tracker-frontend
+npm ci
+npm run dev
+npm run lint
+```
 
-- Backend: see `gear-tracker-backend/README.md`
-- Frontend: see `gear-tracker-frontend/README.md`
+### Backend
+```bash
+cd gear-tracker-backend
+npm ci
+npm run dev
+npm run db:push
+npm run db:seed
+```
 
-## Tech Stack
-- Next.js, React, Tailwind CSS (Frontend)
-- Node.js, Drizzle ORM, Express (Backend)
-- PostgreSQL (Database)
-- Docker Compose (Orchestration)
+## Troubleshooting
+- If `docker compose up --build` fails early, confirm Docker is running and ports `3000`, `3001`, and `5432` are free.
+- If the frontend cannot reach the backend in Docker, verify `API_INTERNAL_URL=http://backend:3001` is present in `docker-compose.yml`.
+- If data seems to reset unexpectedly, that is expected when the backend container restarts because seed runs on startup.
+- If file watching seems stale in Docker, recreate the container or restart the stack.
 
-## License
-MIT
+## Documentation
+- Backend details: [gear-tracker-backend/README.md](gear-tracker-backend/README.md)
+- Frontend details: [gear-tracker-frontend/README.md](gear-tracker-frontend/README.md)
