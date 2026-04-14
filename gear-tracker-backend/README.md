@@ -7,11 +7,11 @@ This is the backend service for the Gear Tracker application. It manages hardwar
 - Database integration (configured via Drizzle ORM)
 - Seed scripts for populating initial data
 - Docker Compose support for easy development
+- Hot reload in Docker and local development (`tsx watch`)
 
 ## Project Structure
 ```
 gear-tracker-backend/
-├── docker-compose.yml         # Docker Compose configuration
 ├── drizzle.config.ts          # Drizzle ORM configuration
 ├── package.json               # Node.js dependencies and scripts
 └── src/
@@ -31,7 +31,7 @@ gear-tracker-backend/
 ### Installation
 1. Install dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 2. Configure environment variables as needed.
 
@@ -40,10 +40,18 @@ gear-tracker-backend/
   ```bash
   npm run dev
   ```
-- **With Docker Compose:**
+- **With Docker Compose (from repository root):**
   ```bash
-  docker-compose up --build
+  docker compose up --build db backend
   ```
+
+The backend API is available at `http://localhost:3001`.
+
+### Docker Development Behavior
+- The backend container runs this startup chain: `npm run push ; npm run seed ; npm run dev`.
+- On each container start/restart, schema changes are pushed and seed is executed.
+- Seed clears and repopulates tables, so data resets on backend restart.
+- Source files are bind-mounted in Docker, and `npm run dev` uses `tsx watch`, so backend changes hot reload automatically.
 
 ### Database Seeding
 To seed the database with initial data:
@@ -53,8 +61,8 @@ npm run seed
 
 ## Scripts
 - `npm run dev` — Start the backend in development mode
-- `npm run build` — Build the project
-- `npm run start` — Start the backend in production mode
+- `npm run generate` — Generate Drizzle migration files
+- `npm run push` — Push schema to the configured database
 - `npm run seed` — Seed the database
 
 ## License
