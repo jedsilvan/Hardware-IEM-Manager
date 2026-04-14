@@ -1,4 +1,4 @@
-export function escapeXml(value: string) {
+function escapeXml(value: string) {
   return value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
