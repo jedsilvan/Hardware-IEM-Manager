@@ -71,6 +71,20 @@ export async function createIEM(data: { brand: string; model: string; connector:
   return res.json();
 }
 
+export async function updateIEM(iemId: number, data: { brand: string; model: string; connector: string }) {
+  const res = await fetch(`${apiBase}/iems/${iemId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    throw new Error(await getApiErrorMessage(res, 'Failed to update IEM'));
+  }
+
+  return res.json() as Promise<IEM>;
+}
+
 export async function createCable(data: { name: string; connector: string; material?: string }) {
   const res = await fetch(`${apiBase}/cables`, {
     method: 'POST',

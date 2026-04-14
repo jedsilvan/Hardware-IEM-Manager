@@ -83,6 +83,54 @@ app.post('/iems', async (req: Request, res: Response) => {
   }
 })
 
+app.patch('/iems/:iemId', async (req: Request, res: Response) => {
+  try {
+    const iemId = Number(req.params.iemId)
+
+    if (Number.isNaN(iemId)) {
+      return res.status(400).json({ error: 'Invalid IEM id' })
+    }
+
+    const validatedData = IEMSchema.parse(req.body)
+    const [existingIem] = await db.select().from(iems).where(eq(iems.id, iemId)).limit(1)
+
+    if (!existingIem) {
+      return res.status(404).json({ error: 'IEM not found' })
+    }
+
+    const linkedCables = await db
+      .select({ connector: cables.connector })
+      .from(iemToCables)
+      .innerJoin(cables, eq(iemToCables.cableId, cables.id))
+      .where(eq(iemToCables.iemId, iemId))
+
+    const hasConnectorMismatch = linkedCables.some((row) => row.connector !== validatedData.connector)
+
+    if (hasConnectorMismatch) {
+      return res.status(400).json({
+        error:
+          'Cannot change connector while incompatible linked cables exist. Update cable links first.',
+      })
+    }
+
+    const [updatedIem] = await db
+      .update(iems)
+      .set({
+        ...validatedData,
+        image: createImageDataUrl(
+          `${validatedData.brand} ${validatedData.model}`,
+          getConnectorAccent(validatedData.connector)
+        ),
+      })
+      .where(eq(iems.id, iemId))
+      .returning()
+
+    return res.status(200).json(updatedIem)
+  } catch (_error) {
+    return res.status(400).json({ error: 'Invalid IEM data' })
+  }
+})
+
 app.post('/cables', async (req: Request, res: Response) => {
   try {
     const validatedData = CableSchema.parse(req.body)

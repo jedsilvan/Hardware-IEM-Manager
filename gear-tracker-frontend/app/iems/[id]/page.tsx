@@ -28,12 +28,18 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
   return (
     <div className="bg-zinc-50 font-geist-sans text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-8 sm:py-10 lg:px-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <Link
             href="/"
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
           >
             Back to Dashboard
+          </Link>
+          <Link
+            href={`/iems/${iem.id}/edit`}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-800"
+          >
+            Edit IEM
           </Link>
         </div>
 
