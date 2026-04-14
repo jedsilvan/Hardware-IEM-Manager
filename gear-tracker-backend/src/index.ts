@@ -33,6 +33,10 @@ const LinkCableSchema = z.object({
   cableId: z.number(),
 })
 
+app.get('/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' })
+})
+
 function mapIemRowsWithCompatibleCables(
   rows: { iem: typeof iems.$inferSelect; cable: typeof cables.$inferSelect | null }[]
 ) {
