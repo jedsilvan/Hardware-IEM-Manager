@@ -12,19 +12,18 @@ export default function EditIEMPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const iemId = Number(params.id)
+  const hasInvalidIemId = Number.isNaN(iemId)
 
   const [brand, setBrand] = useState('')
   const [model, setModel] = useState('')
   const [connector, setConnector] = useState<ConnectorType>('0.78mm')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!hasInvalidIemId)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
-    if (Number.isNaN(iemId)) {
-      setNotFound(true)
-      setLoading(false)
+    if (hasInvalidIemId) {
       return
     }
 
@@ -45,11 +44,11 @@ export default function EditIEMPage() {
       .finally(() => {
         setLoading(false)
       })
-  }, [iemId])
+  }, [hasInvalidIemId, iemId])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!brand.trim() || !model.trim() || Number.isNaN(iemId)) return
+    if (!brand.trim() || !model.trim() || hasInvalidIemId) return
 
     setSubmitting(true)
     setError(null)
@@ -77,7 +76,7 @@ export default function EditIEMPage() {
     )
   }
 
-  if (notFound) {
+  if (hasInvalidIemId || notFound) {
     return (
       <div className="bg-zinc-50 font-geist-sans text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
         <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10 sm:px-10">
