@@ -8,6 +8,7 @@
 - Compatibility checker logic enforced on the backend
 - Modern UI with Next.js and Tailwind CSS
 - Easy local development with Docker Compose
+- Hot reload in Docker for frontend and backend development
 
 ## Project Structure
 
@@ -36,6 +37,8 @@ docker compose up --build
 
 Note: on each backend start/restart in Docker Compose, the app runs the seed script (`npm run seed`). This clears and repopulates the database with sample data every time.
 
+Hot reload note: Docker is configured for live development. Editing files in `gear-tracker-frontend/` or `gear-tracker-backend/` will trigger automatic reload/restart in the running containers.
+
 3. Open the app:
 	- Frontend: http://localhost:3000
 	- Backend API: http://localhost:3001
@@ -55,6 +58,7 @@ docker compose down -v
 
 - If `docker compose up --build` fails immediately, confirm Docker Desktop is running.
 - If ports are already in use, free `3000`, `3001`, and `5432` or change them in `docker-compose.yml`.
+- If reload seems stuck, recreate the frontend container: `docker compose up -d --force-recreate frontend`.
 - To inspect logs per service:
 
 ```bash
