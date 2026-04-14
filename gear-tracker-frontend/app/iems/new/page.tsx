@@ -18,7 +18,7 @@ export default function NewIEMPage() {
   const [model, setModel] = useState('')
   const [connector, setConnector] = useState<ConnectorType>('0.78mm')
   const [allCables, setAllCables] = useState<Cable[]>([])
-  const [selectedCableIds, setSelectedCableIds] = useState<Set<number>>(new Set())
+  const [deselectedCableIds, setDeselectedCableIds] = useState<Set<number>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,18 +26,15 @@ export default function NewIEMPage() {
     fetchCables().then(setAllCables)
   }, [])
 
-  // Pre-select cables whose connector matches the chosen IEM connector
-  useEffect(() => {
-    const matching = allCables.filter((c) => c.connector === connector).map((c) => c.id)
-    setSelectedCableIds(new Set(matching))
-  }, [connector, allCables])
-
   const matchingCables = allCables.filter((c) => c.connector === connector)
   const otherCables = allCables.filter((c) => c.connector !== connector)
+  const selectedCableIds = new Set(
+    matchingCables.map((cable) => cable.id).filter((id) => !deselectedCableIds.has(id))
+  )
   const selectedConnectorAccent = getCableAccent(connector)
 
   function toggleCable(id: number) {
-    setSelectedCableIds((prev) => {
+    setDeselectedCableIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
@@ -48,15 +45,6 @@ export default function NewIEMPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!brand.trim() || !model.trim()) return
-
-    const hasMismatchedSelection = allCables.some(
-      (cable) => selectedCableIds.has(cable.id) && cable.connector !== connector
-    )
-
-    if (hasMismatchedSelection) {
-      setError('Selected cables must use the same connector type as the IEM.')
-      return
-    }
 
     setSubmitting(true)
     setError(null)
@@ -123,7 +111,10 @@ export default function NewIEMPage() {
               <select
                 id="connector"
                 value={connector}
-                onChange={(e) => setConnector(e.target.value as ConnectorType)}
+                onChange={(e) => {
+                  setConnector(e.target.value as ConnectorType)
+                  setDeselectedCableIds(new Set())
+                }}
                 className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-500"
               >
                 {CONNECTORS.map((c) => (
