@@ -33,7 +33,9 @@ gear-tracker-backend/
    ```bash
    npm ci
    ```
-2. Configure environment variables as needed.
+2. Provide `DATABASE_URL` in the environment when running outside Docker.
+
+Docker Compose already injects `DATABASE_URL` for the backend container. If you run backend or Drizzle commands from your host shell, export `DATABASE_URL` first.
 
 ### Running the Backend
 - **Locally:**
