@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 
 import { ConnectorBadge } from '@/components/connector-badge'
 import { fetchIEMById } from '@/lib/api'
+import { getCableAccent } from '@/lib/cable-accent'
+import { cn } from '@/lib/utils'
 
 type IEMDetailPageProps = {
   params: Promise<{ id: string }>
@@ -77,10 +79,13 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {iem.compatibleCables.map((cable) => (
+            {iem.compatibleCables.map((cable) => {
+              const accent = getCableAccent(cable.connector)
+
+              return (
               <article
                 key={cable.id}
-                className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+                className={cn('overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-zinc-950', accent.frame)}
               >
                 {cable.image ? (
                   <Image
@@ -96,13 +101,14 @@ export default async function IEMDetailPage({ params }: IEMDetailPageProps) {
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{cable.material || 'Cable'}</p>
                   <div className="flex items-center justify-between">
                     <ConnectorBadge connector={cable.connector} />
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                    <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', accent.compatiblePill)}>
                       Compatible
                     </span>
                   </div>
                 </div>
               </article>
-            ))}
+              )
+            })}
           </div>
         </section>
       </main>

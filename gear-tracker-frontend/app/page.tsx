@@ -4,6 +4,8 @@ import { Plus } from 'lucide-react'
 
 import { ConnectorBadge } from '@/components/connector-badge'
 import { fetchCables, fetchIEMs, type Cable, type IEM } from '@/lib/api'
+import { getCableAccent } from '@/lib/cable-accent'
+import { cn } from '@/lib/utils'
 
 export default async function Dashboard() {
   const [iems, cables] = await Promise.all([fetchIEMs(), fetchCables()])
@@ -59,32 +61,39 @@ export default async function Dashboard() {
             </div>
           ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {iemsWithImages.map((iem: IEM) => (
-              <Link
-                key={iem.id}
-                href={`/iems/${iem.id}`}
-                className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
-              >
-                <Image
-                  src={iem.image!}
-                  alt={`${iem.brand} ${iem.model}`}
-                  width={1200}
-                  height={800}
-                  className="h-60 w-full object-cover"
-                />
-                <div className="space-y-3 p-4">
-                  <h3 className="text-lg font-semibold group-hover:text-cyan-500 dark:group-hover:text-cyan-300">
-                    {iem.brand} {iem.model}
-                  </h3>
-                  <div className="flex items-center justify-between gap-3">
-                    <ConnectorBadge connector={iem.connector} />
-                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">
-                      {iem.compatibleCables.length} compatible
-                    </span>
+            {iemsWithImages.map((iem: IEM) => {
+              const accent = getCableAccent(iem.connector)
+
+              return (
+                <Link
+                  key={iem.id}
+                  href={`/iems/${iem.id}`}
+                  className={cn(
+                    'group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-zinc-950',
+                    accent.frame
+                  )}
+                >
+                  <Image
+                    src={iem.image!}
+                    alt={`${iem.brand} ${iem.model}`}
+                    width={1200}
+                    height={800}
+                    className="h-60 w-full object-cover"
+                  />
+                  <div className="space-y-3 p-4">
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                      {iem.brand} {iem.model}
+                    </h3>
+                    <div className="flex items-center justify-between gap-3">
+                      <ConnectorBadge connector={iem.connector} />
+                      <span className="text-xs font-semibold uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">
+                        {iem.compatibleCables.length} compatible
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
           )}
         </section>
@@ -113,25 +122,29 @@ export default async function Dashboard() {
             </div>
           ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {cablesWithImages.map((cable: Cable) => (
-              <article
-                key={cable.id}
-                className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
-              >
-                <Image
-                  src={cable.image!}
-                  alt={cable.name}
-                  width={1200}
-                  height={800}
-                  className="h-48 w-full object-cover"
-                />
-                <div className="space-y-3 p-4">
-                  <h3 className="text-base font-semibold">{cable.name}</h3>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{cable.material || 'Cable'}</p>
-                  <ConnectorBadge connector={cable.connector} />
-                </div>
-              </article>
-            ))}
+            {cablesWithImages.map((cable: Cable) => {
+              const accent = getCableAccent(cable.connector)
+
+              return (
+                <article
+                  key={cable.id}
+                  className={cn('overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-zinc-950', accent.frame)}
+                >
+                  <Image
+                    src={cable.image!}
+                    alt={cable.name}
+                    width={1200}
+                    height={800}
+                    className="h-48 w-full object-cover"
+                  />
+                  <div className="space-y-3 p-4">
+                    <h3 className="text-base font-semibold">{cable.name}</h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">{cable.material || 'Cable'}</p>
+                    <ConnectorBadge connector={cable.connector} />
+                  </div>
+                </article>
+              )
+            })}
           </div>
           )}
         </section>

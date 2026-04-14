@@ -6,6 +6,8 @@ import Link from 'next/link'
 
 import { ConnectorBadge } from '@/components/connector-badge'
 import { createIEM, fetchCables, linkCableToIEM, type Cable, type ConnectorType } from '@/lib/api'
+import { getCableAccent } from '@/lib/cable-accent'
+import { cn } from '@/lib/utils'
 
 const CONNECTORS: ConnectorType[] = ['0.78mm', 'MMCX', 'QDC']
 
@@ -32,6 +34,7 @@ export default function NewIEMPage() {
 
   const matchingCables = allCables.filter((c) => c.connector === connector)
   const otherCables = allCables.filter((c) => c.connector !== connector)
+  const selectedConnectorAccent = getCableAccent(connector)
 
   function toggleCable(id: number) {
     setSelectedCableIds((prev) => {
@@ -156,7 +159,7 @@ export default function NewIEMPage() {
                         type="checkbox"
                         checked={selectedCableIds.has(cable.id)}
                         onChange={() => toggleCable(cable.id)}
-                        className="h-4 w-4 accent-cyan-500"
+                        className={cn('h-4 w-4', selectedConnectorAccent.checkbox)}
                       />
                       <span className="flex-1 text-sm font-medium">{cable.name}</span>
                       <ConnectorBadge connector={cable.connector} />
