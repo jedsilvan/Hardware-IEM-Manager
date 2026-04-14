@@ -1,6 +1,44 @@
 import { db } from './index';
 import { iems, cables, iemToCables } from './schema';
 
+function escapeXml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;')
+}
+
+function hexToRgba(hex: string, alpha: number) {
+  const normalized = hex.trim().replace('#', '')
+
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+    return `rgba(248, 250, 252, ${alpha})`
+  }
+
+  const r = parseInt(normalized.slice(0, 2), 16)
+  const g = parseInt(normalized.slice(2, 4), 16)
+  const b = parseInt(normalized.slice(4, 6), 16)
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+function createImageDataUrl(title: string, accent: string) {
+  const safeTitle = escapeXml(title)
+  const titleColor = hexToRgba(accent, 1)
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+      <rect width="1200" height="800" fill="#0f172a" />
+      <rect x="70" y="70" width="1060" height="660" rx="36" fill="#111827" />
+      <text x="600" y="420" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="700" fill="${titleColor}">${safeTitle}</text>
+    </svg>
+  `
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
 async function seed() {
   // Clear tables before seeding
   await db.delete(iemToCables);
@@ -11,25 +49,25 @@ async function seed() {
 
   // 1. Insert IEMs
   const insertedIems = await db.insert(iems).values([
-    { brand: '7Hz', model: 'Elua Ultra', connector: '0.78mm', image: 'https://images.crutchfield.com/products/large_487f41ff0c054827.jpg' },
-    { brand: 'Truthear', model: 'Zero:Blue', connector: '0.78mm', image: 'https://m.media-amazon.com/images/I/71SJ2bBEhJL._AC_SL1500_.jpg' },
-    { brand: 'KZ', model: 'ZSN Pro X', connector: 'QDC', image: 'https://ae-pic-a1.aliexpress-media.com/kf/Sd7559db44d6a49e4a0c48b27d42f45f0R.jpg' },
-    { brand: 'Moondrop', model: 'Blessing 2', connector: '0.78mm', image: 'https://images.crutchfield.com/products/large_487f41ff0c054796.jpg' },
-    { brand: 'Tin HiFi', model: 'T3 Plus', connector: '0.78mm', image: 'https://m.media-amazon.com/images/I/61oQyV2yPdL._AC_SL1000_.jpg' },
-    { brand: 'CCA', model: 'CRA', connector: 'QDC', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S0e3d52a7a7544819bbbde9e882bb0c1eX.jpg' },
-    { brand: 'FiiO', model: 'FH3', connector: 'MMCX', image: 'https://m.media-amazon.com/images/I/61Y3BkqXfIL._AC_SL1000_.jpg' },
-    { brand: 'Shure', model: 'SE215', connector: 'MMCX', image: 'https://m.media-amazon.com/images/I/51qxBEpRKaL._AC_SL1000_.jpg' },
+    { brand: '7Hz', model: 'Elua Ultra', connector: '0.78mm', image: createImageDataUrl('7Hz Elua Ultra', '#38bdf8') },
+    { brand: 'FiiO', model: 'FH3', connector: 'MMCX', image: createImageDataUrl('FiiO FH3', '#f97316') },
+    { brand: 'KZ', model: 'ZSN Pro X', connector: 'QDC', image: createImageDataUrl('KZ ZSN Pro X', '#f59e0b') },
+    { brand: 'Moondrop', model: 'Blessing 2', connector: '0.78mm', image: createImageDataUrl('Moondrop Blessing 2', '#818cf8') },
+    { brand: 'CCA', model: 'CRA', connector: 'QDC', image: createImageDataUrl('CCA CRA', '#fb7185') },
+    { brand: 'Tin HiFi', model: 'T3 Plus', connector: '0.78mm', image: createImageDataUrl('Tin HiFi T3 Plus', '#34d399') },
+    { brand: 'Shure', model: 'SE215', connector: 'MMCX', image: createImageDataUrl('Shure SE215', '#a78bfa') },
+    { brand: 'Truthear', model: 'Zero:Blue', connector: '0.78mm', image: createImageDataUrl('Truthear Zero Blue', '#60a5fa') },
   ]).returning();
 
   // 2. Insert Cables
   const insertedCables = await db.insert(cables).values([
-    { name: 'Moondrop MC2', connector: '0.78mm', material: 'Silver-plated Copper', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S7d1d8e4f7c364b0aa6f3b8e2c5d9f1a2b.jpg' },
-    { name: 'Tripowin Grace', connector: '0.78mm', material: 'Silver-plated OFC', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S4e2f8c1b3a5d9f6e7c8b0a4d2e1f3g5h.jpg' },
-    { name: 'Tripowin Zonie', connector: 'QDC', material: 'Silver-plated', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S3f1a2b5c8d9e0g4h6i2j7k3l5m9o1p2q.jpg' },
-    { name: 'FiiO LC-RE Pro', connector: 'MMCX', material: 'Pure Silver', image: 'https://m.media-amazon.com/images/I/41X7nEXR3gL._AC_.jpg' },
-    { name: 'KZ SPC Cable', connector: 'QDC', material: 'Silver-plated Copper', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S2e4f9c3b1a7d5f8e0g6h2i9j1k5l3m7n.jpg' },
-    { name: 'Shure RMCE-BT2', connector: 'MMCX', material: 'Bluetooth', image: 'https://m.media-amazon.com/images/I/31Y9aXCvF1L._AC_.jpg' },
-    { name: 'Linsoul Tripowin Jelly', connector: '0.78mm', material: 'Hybrid', image: 'https://ae-pic-a1.aliexpress-media.com/kf/S6c3e7f2b9a4d1f5e8g0h3i6j2k9l1m5n.jpg' },
+    { name: 'Moondrop MC2', connector: '0.78mm', material: 'Silver-plated Copper', image: createImageDataUrl('Moondrop MC2', '#38bdf8') },
+    { name: 'Tripowin Grace', connector: '0.78mm', material: 'Silver-plated OFC', image: createImageDataUrl('Tripowin Grace', '#10b981') },
+    { name: 'Tripowin Zonie', connector: 'QDC', material: 'Silver-plated', image: createImageDataUrl('Tripowin Zonie', '#f59e0b') },
+    { name: 'FiiO LC-RE Pro', connector: 'MMCX', material: 'Pure Silver', image: createImageDataUrl('FiiO LC-RE Pro', '#f97316') },
+    { name: 'KZ SPC Cable', connector: 'QDC', material: 'Silver-plated Copper', image: createImageDataUrl('KZ SPC Cable', '#ef4444') },
+    { name: 'Shure RMCE-BT2', connector: 'MMCX', material: 'Bluetooth', image: createImageDataUrl('Shure RMCE-BT2', '#8b5cf6') },
+    { name: 'Linsoul Tripowin Jelly', connector: '0.78mm', material: 'Hybrid', image: createImageDataUrl('Tripowin Jelly', '#06b6d4') },
   ]).returning();
 
   // 3. Link them (Many-to-Many)

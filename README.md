@@ -35,7 +35,7 @@
 docker compose up --build
 ```
 
-Note: on each backend start/restart in Docker Compose, the app runs the seed script (`npm run seed`). This clears and repopulates the database with sample data every time.
+Note: on each backend start/restart in Docker Compose, the app runs the seed script (`npm run db:seed`). This clears and repopulates the database with sample data every time.
 
 Hot reload note: Docker is configured for live development. Editing files in `gear-tracker-frontend/` or `gear-tracker-backend/` will trigger automatic reload/restart in the running containers.
 

@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './db'
 import { iems, cables, iemToCables } from './db/schema'
+import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 const app = express()
@@ -30,6 +31,33 @@ const LinkCableSchema = z.object({
   iemId: z.number(),
   cableId: z.number(),
 })
+
+function mapIemRowsWithCompatibleCables(
+  rows: { iem: typeof iems.$inferSelect; cable: typeof cables.$inferSelect | null }[]
+) {
+  return Array.from(
+    rows
+      .reduce((iemMap, row) => {
+        const existingIem = iemMap.get(row.iem.id)
+
+        if (existingIem) {
+          if (row.cable) {
+            existingIem.compatibleCables.push(row.cable)
+          }
+
+          return iemMap
+        }
+
+        iemMap.set(row.iem.id, {
+          ...row.iem,
+          compatibleCables: row.cable ? [row.cable] : [],
+        })
+
+        return iemMap
+      }, new Map<number, typeof iems.$inferSelect & { compatibleCables: typeof cables.$inferSelect[] }>())
+      .values()
+  )
+}
 
 app.post('/iems', async (req: Request, res: Response) => {
   try {
@@ -67,10 +95,50 @@ app.post('/iems/:iemId/cables/:cableId', async (req: Request, res: Response) => 
 
 app.get('/iems', async (_req: Request, res: Response) => {
   try {
-    const allIems = await db.select().from(iems)
+    const iemRows = await db
+      .select({
+        iem: iems,
+        cable: cables,
+      })
+      .from(iems)
+      .leftJoin(iemToCables, eq(iemToCables.iemId, iems.id))
+      .leftJoin(cables, eq(iemToCables.cableId, cables.id))
+
+    const allIems = mapIemRowsWithCompatibleCables(iemRows)
+
     res.status(200).json(allIems)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch IEMs' })
+  }
+})
+
+app.get('/iems/:iemId', async (req: Request, res: Response) => {
+  try {
+    const iemId = Number(req.params.iemId)
+
+    if (Number.isNaN(iemId)) {
+      return res.status(400).json({ error: 'Invalid IEM id' })
+    }
+
+    const iemRows = await db
+      .select({
+        iem: iems,
+        cable: cables,
+      })
+      .from(iems)
+      .leftJoin(iemToCables, eq(iemToCables.iemId, iems.id))
+      .leftJoin(cables, eq(iemToCables.cableId, cables.id))
+      .where(eq(iems.id, iemId))
+
+    const [iem] = mapIemRowsWithCompatibleCables(iemRows)
+
+    if (!iem) {
+      return res.status(404).json({ error: 'IEM not found' })
+    }
+
+    res.status(200).json(iem)
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch IEM' })
   }
 })
 

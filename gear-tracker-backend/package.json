@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "generate": "drizzle-kit generate",
-    "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "seed": "tsx src/db/seed.ts"
+    "db:push": "drizzle-kit push --config ./drizzle.config.ts",
+    "db:seed": "tsx src/db/seed.ts"
   },
   "keywords": [],
   "author": "Jed Silvan",

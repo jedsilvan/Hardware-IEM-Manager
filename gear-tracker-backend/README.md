@@ -50,7 +50,7 @@ Docker Compose already injects `DATABASE_URL` for the backend container. If you 
 The backend API is available at `http://localhost:3001`.
 
 ### Docker Development Behavior
-- The backend container runs this startup chain: `npm run push ; npm run seed ; npm run dev`.
+- The backend container runs this startup chain: `npm run db:push ; npm run db:seed ; npm run dev`.
 - On each container start/restart, schema changes are pushed and seed is executed.
 - Seed clears and repopulates tables, so data resets on backend restart.
 - Source files are bind-mounted in Docker, and `npm run dev` uses `tsx watch`, so backend changes hot reload automatically.
@@ -58,14 +58,14 @@ The backend API is available at `http://localhost:3001`.
 ### Database Seeding
 To seed the database with initial data:
 ```bash
-npm run seed
+npm run db:seed
 ```
 
 ## Scripts
 - `npm run dev` — Start the backend in development mode
 - `npm run generate` — Generate Drizzle migration files
-- `npm run push` — Push schema to the configured database
-- `npm run seed` — Seed the database
+- `npm run db:push` — Push schema to the configured database
+- `npm run db:seed` — Seed the database
 
 ## License
 MIT
