@@ -95,14 +95,6 @@ Important seed behavior:
 - The backend container runs `npm run db:seed` on startup
 - Seeding clears and repopulates the database each time the backend container starts
 
-## Local Development Without Docker
-
-### Backend
-See [gear-tracker-backend/README.md](gear-tracker-backend/README.md).
-
-### Frontend
-See [gear-tracker-frontend/README.md](gear-tracker-frontend/README.md).
-
 ## High-Level Features
 - Relationship-aware compatibility model using `iem_to_cables`
 - Backend connector validation before links are created
@@ -110,34 +102,6 @@ See [gear-tracker-frontend/README.md](gear-tracker-frontend/README.md).
 - Delete confirmation dialogs in the frontend using Radix Alert Dialog
 - Connector badge colors remain fixed by connector type
 - Cable-related accents are aligned through shared accent mapping in the frontend
-
-## Common Commands
-
-### Full stack
-```bash
-docker compose up --build
-docker compose down
-docker compose logs -f backend
-docker compose logs -f frontend
-docker compose logs -f db
-```
-
-### Frontend
-```bash
-cd gear-tracker-frontend
-npm ci
-npm run dev
-npm run lint
-```
-
-### Backend
-```bash
-cd gear-tracker-backend
-npm ci
-npm run dev
-npm run db:push
-npm run db:seed
-```
 
 ## Troubleshooting
 - If `docker compose up --build` fails early, confirm Docker is running and ports `3000`, `3001`, and `5432` are free.
